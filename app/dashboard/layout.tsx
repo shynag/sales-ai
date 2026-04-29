@@ -52,7 +52,8 @@ export default function DashboardLayout({
         <nav className="flex flex-row md:flex-col flex-none md:flex-1 p-2 md:p-3 gap-1 md:gap-2 overflow-x-auto md:overflow-visible border-b border-border/40 md:border-none no-scrollbar">
           <Link
             href="/dashboard"
-            className={`flex items-center whitespace-nowrap px-3 py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
+            // TAMBAHAN: flex-1 md:flex-none justify-center md:justify-start
+            className={`flex flex-1 md:flex-none items-center justify-center md:justify-start whitespace-nowrap px-3 py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
               isGeneratorActive
                 ? "bg-muted/50 text-foreground" // Class aktif
                 : "text-muted-foreground hover:bg-muted/30 hover:text-foreground" // Class tidak aktif
@@ -66,7 +67,8 @@ export default function DashboardLayout({
 
           <Link
             href="/dashboard/saved"
-            className={`flex items-center whitespace-nowrap px-3 py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
+            // TAMBAHAN: flex-1 md:flex-none justify-center md:justify-start
+            className={`flex flex-1 md:flex-none items-center justify-center md:justify-start whitespace-nowrap px-3 py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
               isSavedActive
                 ? "bg-muted/50 text-foreground" // Class aktif
                 : "text-muted-foreground hover:bg-muted/30 hover:text-foreground" // Class tidak aktif
@@ -75,7 +77,7 @@ export default function DashboardLayout({
             <Library
               className={`size-3.5 md:size-4 mr-2 md:mr-3 ${isSavedActive ? "text-foreground" : "text-muted-foreground"}`}
             />
-            Saved Pages
+            Library
           </Link>
         </nav>
 

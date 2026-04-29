@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { deleteSalesPage } from "@/app/actions/sales-page";
-import { ExportHtmlButton } from "@/components/export-html-button"; // Sesuaikan path import
+import { ExportHtmlButton } from "@/components/export-html-button";
 import { FileText, Trash2, Edit2, Calendar, Plus } from "lucide-react";
 
 type SalesPageLocal = {
@@ -21,16 +22,21 @@ export default async function SavedPages() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // GUARD CLAUSE: Mencegah Prisma Error 500 jika user session null
+  if (!user) {
+    redirect("/login");
+  }
+
   const { default: getPrisma } = await import("@/lib/prisma");
   const prisma = getPrisma();
 
   const pages: SalesPageLocal[] = await prisma.salesPage.findMany({
-    where: { userId: user?.id },
+    where: { userId: user.id },
     orderBy: { createdAt: "desc" },
   });
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden w-full">
       {/* Top Command Bar */}
       <header className="h-12 md:h-14 flex-none border-b border-border/40 flex items-center justify-between px-4 md:px-6 bg-background">
         <div className="text-xs md:text-sm font-medium flex items-center gap-2 text-muted-foreground">
@@ -48,7 +54,7 @@ export default async function SavedPages() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-muted/5">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-muted/5 w-full">
         <div className="mb-6 md:mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
             Document Library
@@ -58,85 +64,86 @@ export default async function SavedPages() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
-          {pages.map((page) => (
-            <div
-              key={page.id}
-              className="group relative flex flex-col justify-between p-5 rounded-lg border border-border/40 bg-background/50 hover:bg-muted/30 transition-all duration-200"
-            >
-              {/* Ultra-Minimalist Content Section */}
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-2 text-foreground">
-                    <FileText className="size-4 text-primary/70" />
-                    <h3
-                      className="font-semibold text-sm truncate"
-                      title={page.productName}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 w-full">
+          {pages.map((page) => {
+            // OPTIMASI: bind Server Action untuk mencegah memory leak
+            const deleteAction = deleteSalesPage.bind(null, page.id);
+
+            return (
+              <div
+                key={page.id}
+                className="group relative flex flex-col justify-between p-5 rounded-lg border border-border/40 bg-background/50 hover:bg-muted/30 transition-all duration-200"
+              >
+                {/* Ultra-Minimalist Content Section */}
+                <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-2 text-foreground w-full">
+                      <FileText className="size-4 text-primary/70 flex-none" />
+                      <h3
+                        className="font-semibold text-sm truncate"
+                        title={page.productName}
+                      >
+                        {page.productName}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5">
+                    <div className="flex items-center text-[11px] md:text-xs text-muted-foreground">
+                      <Calendar className="size-3.5 mr-2 opacity-70" />
+                      <span>
+                        {new Intl.DateTimeFormat("en-US", {
+                          dateStyle: "medium",
+                        }).format(page.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons Bar */}
+                <div className="flex items-center gap-2 mt-6 pt-4 border-t border-border/40">
+                  <div className="flex flex-1 items-center gap-2">
+                    <Link
+                      href={`/dashboard/edit/${page.id}`}
+                      className="flex-1"
                     >
-                      {page.productName}
-                    </h3>
-                  </div>
-                </div>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full h-8 text-xs font-medium bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <Edit2 className="size-3 mr-1.5" />
+                        Edit
+                      </Button>
+                    </Link>
 
-                <div className="mt-2.5">
-                  <div className="flex items-center text-[11px] md:text-xs text-muted-foreground">
-                    <Calendar className="size-3.5 mr-2 opacity-70" />
-                    <span>
-                      {new Intl.DateTimeFormat("en-US", {
-                        dateStyle: "medium",
-                      }).format(page.createdAt)}
-                    </span>
+                    <div className="flex-1">
+                      <ExportHtmlButton
+                        markdown={page.generatedOutput}
+                        productName={page.productName}
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Action Buttons Bar */}
-              <div className="flex items-center gap-2 mt-6 pt-4 border-t border-border/40">
-                {/* Bagian kiri: Edit dan Export berbagi space (flex-1) */}
-                <div className="flex flex-1 items-center gap-2">
-                  <Link href={`/dashboard/edit/${page.id}`} className="flex-1">
+                  {/* Delete Action ter-bind */}
+                  <form action={deleteAction} className="flex-none">
                     <Button
-                      variant="secondary"
+                      variant="ghost"
                       size="sm"
-                      className="w-full h-8 text-xs font-medium bg-muted/50 hover:bg-muted transition-colors"
+                      className="h-8 px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      title="Delete Document"
                     >
-                      <Edit2 className="size-3 mr-1.5" />
-                      Edit
+                      <Trash2 className="size-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
-                  </Link>
-
-                  {/* Client Component untuk Export di-inject di sini */}
-                  <div className="flex-1">
-                    <ExportHtmlButton
-                      markdown={page.generatedOutput}
-                      productName={page.productName}
-                    />
-                  </div>
+                  </form>
                 </div>
-
-                {/* Bagian kanan: Delete Action */}
-                <form
-                  action={async () => {
-                    "use server";
-                    await deleteSalesPage(page.id);
-                  }}
-                  className="flex-none"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                    title="Delete Document"
-                  >
-                    <Trash2 className="size-4" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </form>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
+        {/* Empty State */}
         {pages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-border/60 rounded-xl bg-background/30 mt-4">
             <div className="size-10 rounded-full bg-muted flex items-center justify-center mb-4">

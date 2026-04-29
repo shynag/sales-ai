@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     const result = await streamText({
       // Fallback ke model paling universal di ekosistem Google v1beta
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-2.5-flash-lite"),
 
       // Trik arsitektural: Satukan instruksi sistem ke dalam prompt utama
       // untuk mem-bypass error "not supported for generateContent"
