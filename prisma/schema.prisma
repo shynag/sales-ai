@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+// Entitas utama untuk menyimpan hasil output AI
+model SalesPage {
+  id              String   @id @default(uuid())
+  userId          String   // ID ini akan nyambung ke UUID dari Supabase Auth
+  productName     String
+  targetAudience  String
+  generatedOutput String   @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId]) // Indexing agar query history per-user lebih cepat
+}

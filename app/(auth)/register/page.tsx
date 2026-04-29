@@ -1,0 +1,86 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sparkles } from "lucide-react";
+import { register } from "@/app/actions/auth";
+
+export default function RegisterPage() {
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center bg-background p-6 md:p-10 font-sans antialiased">
+      <div className="w-full max-w-[380px] flex flex-col">
+        {/* Header Section */}
+        <div className="mb-10 flex flex-col items-center gap-2 text-center">
+          <Link href="/" className="flex items-center gap-2 mb-4 group">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
+              <Sparkles className="size-5 text-primary" />
+            </div>
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+            Create an account
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Enter your details to get started with SalesAI
+          </p>
+        </div>
+
+        {/* Form Section */}
+        <div className="w-full">
+          <form action={register} className="space-y-5">
+            <div className="space-y-2.5">
+              <Label
+                htmlFor="email"
+                className="text-xs font-semibold text-foreground/80"
+              >
+                Email
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                required
+                placeholder="admin@shynag.dev"
+                className="h-11 bg-muted/20 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-shadow"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <Label
+                htmlFor="password"
+                className="text-xs font-semibold text-foreground/80"
+              >
+                Password
+              </Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minLength={6}
+                className="h-11 bg-muted/20 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40 transition-shadow"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 text-sm font-semibold mt-4 group"
+            >
+              Register
+            </Button>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-sm text-muted-foreground mt-8">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-foreground hover:text-primary transition-colors"
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
