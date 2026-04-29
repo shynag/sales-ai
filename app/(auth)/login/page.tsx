@@ -1,14 +1,39 @@
+"use client";
+
 import Link from "next/link";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles } from "lucide-react";
-// Import action orisinil lu, biarkan tetap Server Component
+import { Sparkles, Loader2 } from "lucide-react";
 import { login } from "@/app/actions/auth";
+
+// 1. Ekstraksi komponen tombol agar bisa membaca context dari <form> induknya
+function SubmitButton() {
+  // Hook ini akan otomatis menjadi true ketika action={login} sedang berjalan
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="w-full h-11 text-sm font-semibold mt-4 group transition-all"
+    >
+      {pending ? (
+        <>
+          {/* Efek muter-muter (animate-spin) bawaan Tailwind */}
+          <Loader2 className="size-4 mr-2 animate-spin text-primary-foreground/70" />
+          Signing In...
+        </>
+      ) : (
+        "Sign In"
+      )}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
   return (
-    // Wrapper full screen dengan estetika minimalist
     <main className="min-h-screen flex flex-col items-center justify-center bg-background p-6 md:p-10 font-sans antialiased">
       <div className="w-full max-w-[380px] flex flex-col">
         {/* Header Section */}
@@ -28,7 +53,6 @@ export default function LoginPage() {
 
         {/* Form Section */}
         <div className="w-full">
-          {/* Langsung menggunakan Server Action milik lu */}
           <form action={login} className="space-y-5">
             <div className="space-y-2.5">
               <Label
@@ -71,12 +95,8 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-11 text-sm font-semibold mt-4 group"
-            >
-              Sign In
-            </Button>
+            {/* 2. Gunakan komponen SubmitButton yang sudah kita buat */}
+            <SubmitButton />
           </form>
         </div>
 
