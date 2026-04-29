@@ -1,9 +1,34 @@
+"use client";
+
 import Link from "next/link";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { register } from "@/app/actions/auth";
+
+// 1. Ekstraksi komponen tombol untuk membaca state form
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="w-full h-11 text-sm font-semibold mt-4 group transition-all"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="size-4 mr-2 animate-spin text-primary-foreground/70" />
+          Creating Account...
+        </>
+      ) : (
+        "Register"
+      )}
+    </Button>
+  );
+}
 
 export default function RegisterPage() {
   return (
@@ -61,12 +86,8 @@ export default function RegisterPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-11 text-sm font-semibold mt-4 group"
-            >
-              Register
-            </Button>
+            {/* 2. Gunakan komponen SubmitButton */}
+            <SubmitButton />
           </form>
         </div>
 
